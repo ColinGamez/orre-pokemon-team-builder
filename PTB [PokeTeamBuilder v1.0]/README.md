@@ -1,87 +1,186 @@
-# PTB — Pokémon Team Builder v1.0
+# Orre Pokémon Team Builder
 
-> **Orre Region Edition** — Full GameCube era support with Shadow Pokémon mechanics, GBA link cable integration, and Memory Card management.
+> **GameCube × GBA Edition** — The definitive team builder for the Orre region era.
+> Full Pokémon Colosseum, XD: Gale of Darkness, and GBA link cable support.
 
 [![Python 3.8+](https://img.shields.io/badge/python-3.8%2B-blue.svg)](https://www.python.org/)
 [![Flask](https://img.shields.io/badge/flask-2.3-green.svg)](https://flask.palletsprojects.com/)
+[![GameCube](https://img.shields.io/badge/GameCube-Colosseum%20%7C%20XD-purple.svg)](#gamecube-support)
+[![GBA](https://img.shields.io/badge/GBA-Ruby%20%7C%20Sapphire%20%7C%20Emerald%20%7C%20FR%2FLG-gold.svg)](#gba-link-cable)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ---
 
-## Overview
+## What Is This?
 
-PTB is a comprehensive Pokémon team building and analysis platform supporting games from the **GameCube era through modern Switch titles**. It features a full web interface, desktop GUI, and mobile app, with deep support for the GameCube era's unique mechanics.
+The **Orre Pokémon Team Builder** is a comprehensive team building and analysis platform built around the **GameCube era** of Pokémon games — specifically Pokémon Colosseum and XD: Gale of Darkness — with full GBA link cable integration for Ruby, Sapphire, Emerald, FireRed, and LeafGreen.
 
-### Highlights
-
-- 🎮 **GameCube-era focus** — Shadow Pokémon, purification, Colosseum/XD mechanics
-- 💾 **Memory Card support** — Import `.gci` files, manage virtual memory cards (`.ptbmc`)
-- 🔗 **GBA Link Cable** — Parse Gen 3 `.sav` files (Ruby/Sapphire/Emerald/FR/LG), full PK3 decryption
-- 🌐 **Web interface** — Orre-themed dark UI with real-time features via Socket.IO
-- 📊 **Team analysis** — Type coverage, weakness analysis, synergy scoring, stat balance
-- 🏆 **Tournaments** — Bracket management, multiple formats, leaderboards
+It also supports all other generations (DS through Switch), but the **GameCube/GBA connection is the heart of this project**.
 
 ---
 
-## Features
+## GameCube Support
 
-### Game Support
+### Pokémon Colosseum & XD: Gale of Darkness
+
+The GameCube games had unique mechanics that no other Pokémon games have replicated:
+
+| Feature | Details |
+|---------|---------|
+| **Shadow Pokémon** | 48 in Colosseum, 59 in XD — corrupted Pokémon with closed hearts |
+| **Shadow Moves** | Exclusive moves only Shadow Pokémon can use |
+| **Purification** | Multi-step process: battles, walking, Relic Stone |
+| **Snag Machine** | Wes/Michael's device to capture other trainers' Pokémon |
+| **Cipher** | The villain faction creating Shadow Pokémon |
+| **Orre Region** | A desert region with no wild Pokémon — all obtained via Snagging or GBA trade |
+
+This tool implements all of these mechanics:
+- Shadow Pokémon tracking with shadow level (1–5) and purification progress
+- Shadow move availability per shadow level
+- Purification Chamber simulation (XD)
+- Full Colosseum and XD Shadow Pokémon rosters with trainer locations
+
+### Memory Card Support
+
+Import and manage GameCube Memory Card save files:
+
+```
+Supported formats:
+  .gci   — Single-game GCI export (Colosseum GC6E/J/P, XD GXXE/J/P, Box GPXE/J)
+  .ptbmc — PTB's own JSON-based memory card format
+```
+
+**Features:**
+- Parse `.gci` files: trainer name, ID, play time, party Pokémon, Shadow Pokémon detection
+- Create virtual memory cards with custom labels and sizes (59/251/1019 blocks)
+- View all save slots, party Pokémon, and Shadow Pokémon in the web UI
+- Export/save cards in `.ptbmc` format (human-readable JSON)
+
+---
+
+## GBA Link Cable
+
+### How It Worked in the Original Games
+
+The GameCube connected to the GBA via an official link cable. This allowed:
+1. **Colosseum/XD reading your GBA party and boxes** — you could trade Pokémon between the two systems
+2. **Purified Shadow Pokémon going back to GBA** — after purification in Colosseum/XD
+3. **Pokémon Box storing GBA Pokémon** on the GameCube Memory Card
+
+### What This Tool Implements
+
+Full Gen 3 GBA save file parsing with **complete PK3 binary decryption**:
+
+```
+Supported games:
+  Pokémon Ruby      (AXV — US/EU/JP)
+  Pokémon Sapphire  (AXP — US/EU/JP)
+  Pokémon Emerald   (BPE — US/EU/JP)
+  Pokémon FireRed   (BPR — US/EU/JP)
+  Pokémon LeafGreen (BPG — US/EU/JP)
+```
+
+**Technical implementation:**
+- Dual save slot detection (picks highest save index = most recent)
+- Section checksum verification (Gen 3 32-bit folded checksum)
+- Gen 3 character table decoding (custom GBA encoding, not ASCII)
+- **PK3 decryption**: XOR with `personality_value ^ (trainer_id | secret_id << 16)`
+- Substructure reordering by `personality_value % 24` (all 24 GAEM orderings)
+- Party parsing from section 1, PC box parsing from sections 5–13 (14 boxes × 30 slots)
+- Shiny detection, gender calculation, IV/EV extraction, met game/level
+- Complete Gen 3 species names (#1–#386), 354 move names, 262 item names
+
+**Transfer validation:**
+- GBA→GCN compatibility checking (species range, EVs, eggs, shadow status)
+- Version-exclusive Pokémon tracking (Ruby/Sapphire/FR/LG exclusives)
+- Shadow Pokémon blocked from transfer until purified
+
+---
+
+## All Supported Games
 
 | Platform | Games |
 |----------|-------|
-| **GameCube** | Pokémon Colosseum, XD: Gale of Darkness, Pokémon Box |
-| **GBA** | Ruby, Sapphire, Emerald, FireRed, LeafGreen |
+| **GameCube** ⭐ | Pokémon Colosseum, XD: Gale of Darkness, Pokémon Box |
+| **GBA** ⭐ | Ruby, Sapphire, Emerald, FireRed, LeafGreen |
 | **Wii** | Pokémon Battle Revolution, Pokémon Ranch |
 | **DS** | Diamond/Pearl/Platinum, HeartGold/SoulSilver, Black/White, B2/W2 |
 | **3DS** | X/Y, ORAS, Sun/Moon, USUM |
 | **Switch** | Let's Go, Sword/Shield, BDSP, Legends Arceus, Scarlet/Violet |
 
-### Core Features
+⭐ = Primary focus with deep feature support
 
-- **Team Builder** — Advanced stat calculations, nature optimization, move selection
-- **Team Analyzer** — Type coverage, weakness/resistance analysis, synergy scoring
-- **Battle Simulator** — Damage calculations, AI opponents
-- **Breeding Calculator** — IV inheritance, nature passing, egg group compatibility
-- **Shadow Pokémon System** — Full Colosseum/XD mechanics (shadow levels, purification, Relic Stone)
-- **Memory Card Manager** — Import `.gci` files, create virtual memory cards, manage save slots
-- **GBA Link Cable** — Parse Gen 3 saves, PK3 decryption, GBA→GCN transfer validation
-- **Tournament System** — Bracket management, multiple formats
-- **Social Hub** — User profiles, team sharing, community features
-- **Admin Panel** — User management, content moderation, analytics
+---
+
+## Features
+
+### Core Team Builder
+- Advanced stat calculations with correct Gen 3 formulas
+- Nature optimization (all 25 natures with correct stat modifiers)
+- Move selection with Gen 3 move database
+- Type coverage analysis using the complete type chart (all generations + Shadow type)
+- Weakness/resistance analysis, synergy scoring, stat balance
+
+### Shadow Pokémon System
+- Full Colosseum roster: 48 Shadow Pokémon with trainer locations
+- Full XD roster: 59 Shadow Pokémon including Lugia and the legendary birds
+- Shadow level tracking (1–5) with stat reduction calculation
+- Purification progress tracking
+- Shadow move availability per shadow level
+- Relic Stone purification simulation
+
+### Memory Card Manager
+- Import `.gci` files from real GameCube saves
+- Create virtual memory cards
+- View trainer data, party Pokémon, Shadow Pokémon
+- Save/load in `.ptbmc` format
+
+### GBA Link Cable
+- Parse `.sav` files from all Gen 3 GBA games
+- Full PK3 binary decryption
+- View party and all 14 PC boxes (30 slots each)
+- Transfer validation (GBA→GCN and GCN→GBA)
+- Shadow Pokémon reference lists
+
+### Additional Features
+- Battle simulator with damage calculations
+- Breeding calculator (IV inheritance, nature passing, egg groups)
+- Tournament system (bracket management, multiple formats)
+- Social hub (user profiles, team sharing)
+- Admin panel (user management, analytics)
+- Desktop GUI (tkinter)
+- Mobile app (React Native)
 
 ---
 
 ## Installation
 
 ### Prerequisites
-
 - Python 3.8 or higher
-- pip
 
 ### Quick Start
 
 ```bash
 # Clone the repository
 git clone https://github.com/ColinGamez/orre-pokemon-team-builder.git
-cd "PTB [PokeTeamBuilder v1.0]"
+cd "orre-pokemon-team-builder/PTB [PokeTeamBuilder v1.0]"
 
 # Install dependencies
 pip install -r requirements.txt
 
-# Set up environment variables
+# Set up environment
 cp .env.example .env
-# Edit .env with your configuration
+# Edit .env — set PTB_SECRET_KEY and ADMIN_PIN at minimum
 
 # Initialize databases
 python initialize_databases.py
-python initialize_social_database.py  # Optional: social features
 
-# Run the web application
+# Run the web app
 cd web
 python app.py
 ```
 
-The web app will be available at `http://localhost:5000`.
+Open `http://localhost:5000` in your browser.
 
 ### Desktop GUI
 
@@ -89,30 +188,18 @@ The web app will be available at `http://localhost:5000`.
 python run_gui.py
 ```
 
-### Backend Server (Email Verification)
-
-```bash
-# Demo mode (no SMTP required — emails saved to logs/)
-python start_backend.py
-
-# Production mode (configure .env first)
-python start_backend.py --production
-```
-
 ---
 
 ## Configuration
 
-Copy `.env.example` to `.env` and configure:
+Copy `.env.example` to `.env`:
 
 ```env
-# Flask secret key (generate with: python -c "import secrets; print(secrets.token_urlsafe(32))")
-PTB_SECRET_KEY=your-secret-key-here
+# Required
+PTB_SECRET_KEY=generate-with-python-secrets-module
+ADMIN_PIN=your-secure-pin
 
-# Admin panel PIN (keep secure, do not commit)
-ADMIN_PIN=your-admin-pin-here
-
-# Email (optional — for verification features)
+# Optional — email verification
 SMTP_SERVER=smtp.gmail.com
 SMTP_PORT=587
 SENDER_EMAIL=your-email@gmail.com
@@ -131,156 +218,41 @@ DEBUG=False
 ```
 PTB [PokeTeamBuilder v1.0]/
 ├── src/
-│   ├── core/           # Core Pokémon classes and mechanics
-│   │   ├── pokemon.py  # Pokemon, ShadowPokemon, stats, natures
-│   │   ├── types.py    # Type effectiveness (all generations + Shadow)
-│   │   ├── moves.py    # Move system with PK3 decryption support
-│   │   └── abilities.py
-│   ├── battle/         # Battle engine and AI
-│   ├── config/         # Game configuration and database paths
-│   ├── features/       # Advanced features
-│   │   ├── memory_card.py      # GameCube Memory Card (.gci/.ptbmc)
-│   │   ├── gba_support.py      # GBA save parser, PK3 format, GBA→GCN
-│   │   ├── breeding_calculator.py
-│   │   ├── tournament_system.py
-│   │   └── save_file_importer.py
-│   ├── gui/            # Desktop GUI (tkinter)
-│   ├── teambuilder/    # Team management, analysis, validation
-│   │   ├── team.py     # PokemonTeam, TeamEra, GameSpecificFeatures
-│   │   ├── analyzer.py # TeamAnalyzer (type coverage, weaknesses, synergy)
-│   │   ├── validator.py
-│   │   └── optimizer.py
-│   ├── trading/        # Trading system
-│   │   ├── gamecube_trading.py # Colosseum/XD/Box trading
-│   │   ├── gba_trading.py      # GBA link cable interface
-│   │   ├── ds_trading.py
-│   │   ├── switch_trading.py
-│   │   └── trading_hub.py
-│   └── utils/          # Logging, performance, sprite management
+│   ├── core/
+│   │   ├── pokemon.py      # Pokemon, ShadowPokemon, stats, natures
+│   │   ├── types.py        # Type chart (all gens + Shadow type)
+│   │   └── moves.py        # Move system
+│   ├── features/
+│   │   ├── memory_card.py  # GameCube Memory Card (.gci / .ptbmc)
+│   │   └── gba_support.py  # GBA save parser, PK3 decryption, GBA→GCN
+│   ├── trading/
+│   │   ├── gamecube_trading.py  # Colosseum/XD/Box trading
+│   │   └── gba_trading.py       # GBA link cable interface
+│   └── teambuilder/
+│       ├── team.py         # PokemonTeam, TeamEra, GameSpecificFeatures
+│       └── analyzer.py     # Type coverage, weaknesses, synergy
 ├── web/
-│   ├── app.py          # Flask web application (main entry point)
-│   ├── static/
-│   │   ├── css/style.css       # GameCube/Orre theme
-│   │   └── js/main.js
+│   ├── app.py              # Flask web application
+│   ├── static/css/style.css     # GameCube/Orre dark theme
 │   └── templates/
-│       ├── base.html           # Base template with Orre navigation
-│       ├── index.html          # Home page
-│       ├── login.html          # Trainer authentication
-│       ├── dashboard.html      # User dashboard
-│       ├── memory_card.html    # Memory Card manager
-│       └── gba_support.html    # GBA Link Cable interface
-├── mobile/             # React Native mobile app
-├── data/               # Pokémon database (JSON)
-│   ├── pokemon.json
-│   ├── moves.json
-│   └── abilities.json
-├── .env.example        # Environment variable template
-├── requirements.txt    # Python dependencies
-├── run_gui.py          # Desktop GUI entry point
-└── start_backend.py    # Backend server entry point
+│       ├── base.html            # Orre navigation
+│       ├── index.html           # Home (Orre-themed)
+│       ├── memory_card.html     # Memory Card manager
+│       └── gba_support.html     # GBA Link Cable interface
+├── data/                   # Pokémon database (JSON)
+├── .env.example            # Configuration template
+└── requirements.txt        # Python dependencies
 ```
-
----
-
-## Memory Card Support
-
-PTB supports GameCube Memory Card save files:
-
-### Supported Formats
-- **`.gci`** — Single-game GCI export (Colosseum, XD, Box — all regions)
-- **`.ptbmc`** — PTB's own JSON-based memory card format
-
-### Features
-- Import `.gci` files and view trainer data, party Pokémon, and Shadow Pokémon
-- Create virtual memory cards with custom labels and sizes
-- Export/save cards in `.ptbmc` format
-- Shadow Pokémon detection with purification progress tracking
-
-### Usage
-Navigate to **Memory Card** in the web interface, or use the API:
-```
-POST /api/memory-card/import-gci   — Import a .gci file
-POST /api/memory-card/create       — Create a new virtual card
-GET  /api/memory-card/list         — List saved cards
-```
-
----
-
-## GBA Link Cable Support
-
-PTB implements the full Gen 3 GBA save file format:
-
-### Supported Games
-- Pokémon Ruby / Sapphire / Emerald
-- Pokémon FireRed / LeafGreen
-- All regions (US, EU, JP)
-
-### Features
-- Full PK3 binary decryption (personality value XOR encryption, substructure reordering)
-- Party and PC box parsing (14 boxes × 30 slots)
-- Shiny detection, gender calculation, IV extraction
-- GBA→GCN transfer compatibility validation
-- Shadow Pokémon reference lists (Colosseum: 48 Pokémon, XD: 59 Pokémon)
-- Version-exclusive Pokémon tracking
-
-### Usage
-Navigate to **GBA Link** in the web interface, or use the API:
-```
-POST /api/gba/import-save          — Parse a .sav file
-POST /api/gba/transfer-to-gcn      — Validate GBA→GCN transfer
-GET  /api/gba/shadow-list          — Get Shadow Pokémon list
-GET  /api/gba/version-exclusives   — Get version exclusives
-```
-
----
-
-## Admin Panel
-
-Access via the **🔒 Admin Panel** button in the desktop GUI.
-
-**PIN:** Set via `ADMIN_PIN` environment variable (see `.env.example`).
-
-**Features:**
-- 📊 Dashboard with system statistics
-- 👥 User management (search, verify, delete, ban)
-- 📝 Content moderation
-- 📈 Detailed analytics
-- 💾 Database backup and maintenance
-- ⚙️ System settings
-
-See [ADMIN_PANEL_GUIDE.md](ADMIN_PANEL_GUIDE.md) for full documentation.
 
 ---
 
 ## API Reference
 
-### Team Builder
-```
-GET  /api/pokemon/search           — Search Pokémon by name/ID
-POST /api/teams                    — Create a new team
-GET  /api/teams                    — List user's teams
-POST /api/teams/<id>/analyze       — Analyze a team
-```
-
-### Battle
-```
-POST /api/battle/create            — Create a battle
-GET  /api/battle/<id>              — Get battle state
-POST /api/battle/<id>/move         — Make a move
-```
-
-### Tournaments
-```
-GET  /api/tournaments              — List tournaments
-POST /api/tournaments              — Create a tournament
-POST /api/tournaments/<id>/join    — Join a tournament
-```
-
 ### Memory Card
 ```
-POST /api/memory-card/import-gci   — Import .gci file
-POST /api/memory-card/create       — Create virtual card
-POST /api/memory-card/load         — Load .ptbmc file
+POST /api/memory-card/import-gci   — Import a .gci file
+POST /api/memory-card/create       — Create a virtual card
+POST /api/memory-card/load         — Load a .ptbmc file
 POST /api/memory-card/save         — Save card to .ptbmc
 POST /api/memory-card/delete       — Delete a card
 GET  /api/memory-card/list         — List saved cards
@@ -288,73 +260,42 @@ GET  /api/memory-card/list         — List saved cards
 
 ### GBA Link Cable
 ```
-POST /api/gba/import-save          — Parse GBA .sav file
-POST /api/gba/transfer-to-gcn      — Validate transfer
+POST /api/gba/import-save          — Parse a GBA .sav file
+POST /api/gba/transfer-to-gcn      — Validate GBA→GCN transfer
 POST /api/gba/convert-to-ptb       — Convert PK3 to PTB format
-GET  /api/gba/shadow-list          — Shadow Pokémon list
-GET  /api/gba/version-exclusives   — Version exclusives
+GET  /api/gba/shadow-list          — Shadow Pokémon list (Colosseum/XD)
+GET  /api/gba/version-exclusives   — Version-exclusive Pokémon
+```
+
+### Health
+```
+GET  /health                       — Service health check
+GET  /robots.txt                   — Robots exclusion
 ```
 
 ---
 
 ## Production Deployment
 
-### Using Gunicorn
-
 ```bash
+# Install production server
 pip install gunicorn
+
+# Run with gunicorn
 cd web
 gunicorn -w 4 -b 0.0.0.0:5000 app:app
 ```
 
-### Using Docker
-
-```dockerfile
-FROM python:3.11-slim
-WORKDIR /app
-COPY . .
-RUN pip install -r requirements.txt
-ENV PTB_SECRET_KEY=change-me-in-production
-EXPOSE 5000
-CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:5000", "web/app:app"]
+Set `PTB_SECRET_KEY` to a strong random value in production:
+```bash
+python -c "import secrets; print(secrets.token_urlsafe(32))"
 ```
-
-### Environment Variables (Production)
-
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `PTB_SECRET_KEY` | Flask session secret key | **Yes** |
-| `ADMIN_PIN` | Admin panel PIN | **Yes** |
-| `SMTP_SERVER` | SMTP server for emails | No |
-| `SMTP_PORT` | SMTP port (default: 587) | No |
-| `SENDER_EMAIL` | Sender email address | No |
-| `SENDER_PASSWORD` | SMTP password/app password | No |
-| `HOST` | Server host (default: 0.0.0.0) | No |
-| `PORT` | Server port (default: 5000) | No |
-| `DEBUG` | Debug mode (default: False) | No |
 
 ---
 
-## Development
+## Contributing
 
-### Running Tests
-
-```bash
-pip install pytest pytest-flask
-pytest tests/
-```
-
-### Code Style
-
-This project follows PEP 8. Use `flake8` for linting:
-```bash
-pip install flake8
-flake8 src/ web/
-```
-
-### Contributing
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution guidelines.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ---
 
@@ -366,10 +307,11 @@ See [CHANGELOG.md](CHANGELOG.md) for a full history of changes.
 
 ## License
 
-This project is licensed under the MIT License — see [LICENSE](LICENSE) for details.
+MIT License — see [LICENSE](LICENSE) for details.
 
 ---
 
 ## Disclaimer
 
-This project is a fan-made tool and is not affiliated with, endorsed by, or connected to Nintendo, Game Freak, or The Pokémon Company. Pokémon and all related names are trademarks of their respective owners.
+This is a fan-made tool. Not affiliated with Nintendo, Game Freak, or The Pokémon Company.
+Pokémon and all related names are trademarks of their respective owners.

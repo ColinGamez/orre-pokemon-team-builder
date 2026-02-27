@@ -9,7 +9,7 @@ Thank you for your interest in contributing! This document outlines how to get s
 1. **Fork** the repository on GitHub
 2. **Clone** your fork locally:
    ```bash
-   git clone https://github.com/yourusername/ptb-poketeambuilder.git
+   git clone https://github.com/ColinGamez/orre-pokemon-team-builder.git
    cd "PTB [PokeTeamBuilder v1.0]"
    ```
 3. **Create a virtual environment**:

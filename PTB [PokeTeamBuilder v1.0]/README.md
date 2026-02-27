@@ -62,7 +62,7 @@ PTB is a comprehensive Pokémon team building and analysis platform supporting g
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/ptb-poketeambuilder.git
+git clone https://github.com/ColinGamez/orre-pokemon-team-builder.git
 cd "PTB [PokeTeamBuilder v1.0]"
 
 # Install dependencies

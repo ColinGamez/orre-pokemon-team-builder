@@ -1,29 +1,38 @@
 {% extends "base.html" %}
 
-{% block title %}Home - Pokemon Team Builder{% endblock %}
+{% block title %}PTB — Orre Region Team Builder{% endblock %}
 
 {% block content %}
 <div class="container">
-    <!-- Hero Section -->
+
+    <!-- Hero Section — Cipher Lab terminal aesthetic -->
     <div class="row mb-5">
         <div class="col-lg-12 text-center">
-            <div class="hero-section bg-gradient-primary text-white p-5 rounded-3 shadow">
-                <h1 class="display-4 fw-bold mb-3">
-                    <i class="fas fa-dragon me-3"></i>Pokemon Team Builder
+            <div class="hero-section text-white p-5 rounded-3 shadow fade-in-up">
+                <div class="mb-3">
+                    <span class="badge type-shadow px-3 py-2 mb-3" style="font-size:0.7rem; letter-spacing:0.15em;">
+                        <i class="fas fa-bolt me-1"></i>SNAG MACHINE ONLINE
+                    </span>
+                </div>
+                <h1 class="display-4 fw-bold mb-3 glow-cyan">
+                    <i class="fas fa-bolt me-3"></i>ORRE TEAM BUILDER
                 </h1>
-                <p class="lead mb-4">
-                    Build, analyze, and optimize your Pokemon teams for competitive play across all generations!
+                <p class="lead mb-2" style="color: #a0a0cc;">
+                    Build, analyze, and purify your Pokemon team — from Phenac City to the Cipher Lab.
+                </p>
+                <p class="mb-4" style="font-size:0.85rem; color: #606090; font-family: 'Orbitron', monospace; letter-spacing: 0.1em;">
+                    SUPPORTING ALL GENERATIONS &bull; SHADOW POKEMON MECHANICS &bull; FULL BATTLE SIMULATION
                 </p>
                 {% if not current_user %}
-                <a href="{{ url_for('login') }}" class="btn btn-light btn-lg me-3">
-                    <i class="fas fa-play me-2"></i>Get Started
+                <a href="{{ url_for('login') }}" class="btn btn-primary btn-lg me-3">
+                    <i class="fas fa-sign-in-alt me-2"></i>Access Terminal
                 </a>
                 {% else %}
-                <a href="{{ url_for('dashboard') }}" class="btn btn-light btn-lg me-3">
-                    <i class="fas fa-tachometer-alt me-2"></i>Go to Dashboard
+                <a href="{{ url_for('dashboard') }}" class="btn btn-primary btn-lg me-3">
+                    <i class="fas fa-tachometer-alt me-2"></i>Command Center
                 </a>
                 <a href="{{ url_for('team_builder') }}" class="btn btn-outline-light btn-lg">
-                    <i class="fas fa-users me-2"></i>Build a Team
+                    <i class="fas fa-users me-2"></i>Build Team
                 </a>
                 {% endif %}
             </div>
@@ -33,94 +42,97 @@
     <!-- Features Section -->
     <div class="row mb-5">
         <div class="col-lg-12">
-            <h2 class="text-center mb-4">Powerful Features</h2>
-            
+            <h2 class="text-center mb-1" style="font-size:1rem; letter-spacing:0.2em; color: var(--gc-text-muted);">
+                — SYSTEM MODULES —
+            </h2>
+            <h3 class="text-center mb-4 text-cyan">Core Features</h3>
+
             <div class="row g-4">
                 <div class="col-md-6 col-lg-4">
-                    <div class="card h-100 shadow-sm">
-                        <div class="card-body text-center">
+                    <div class="card h-100">
+                        <div class="card-body text-center py-4">
                             <div class="feature-icon mb-3">
-                                <i class="fas fa-users fa-3x text-primary"></i>
+                                <i class="fas fa-users fa-3x text-purple"></i>
                             </div>
                             <h5 class="card-title">Team Builder</h5>
                             <p class="card-text">
-                                Create and customize Pokemon teams with advanced stat calculations, 
-                                nature optimization, and move selection.
+                                Construct your squad with advanced stat calculations,
+                                nature optimization, and move selection across all eras.
                             </p>
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="col-md-6 col-lg-4">
-                    <div class="card h-100 shadow-sm">
-                        <div class="card-body text-center">
+                    <div class="card h-100">
+                        <div class="card-body text-center py-4">
                             <div class="feature-icon mb-3">
-                                <i class="fas fa-chart-line fa-3x text-success"></i>
+                                <i class="fas fa-chart-line fa-3x text-cyan"></i>
                             </div>
                             <h5 class="card-title">Team Analysis</h5>
                             <p class="card-text">
-                                Analyze your team's type coverage, weaknesses, and strengths 
-                                with detailed reports and improvement suggestions.
+                                Scan your team's type coverage, weaknesses, and synergies
+                                with detailed tactical reports.
                             </p>
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="col-md-6 col-lg-4">
-                    <div class="card h-100 shadow-sm">
-                        <div class="card-body text-center">
+                    <div class="card h-100">
+                        <div class="card-body text-center py-4">
                             <div class="feature-icon mb-3">
-                                <i class="fas fa-sword fa-3x text-danger"></i>
+                                <i class="fas fa-bolt fa-3x" style="color: var(--gc-danger);"></i>
                             </div>
                             <h5 class="card-title">Battle Simulator</h5>
                             <p class="card-text">
-                                Test your teams in realistic battle simulations with 
+                                Test your teams in full battle simulations with
                                 damage calculations and AI opponents.
                             </p>
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="col-md-6 col-lg-4">
-                    <div class="card h-100 shadow-sm">
-                        <div class="card-body text-center">
+                    <div class="card h-100">
+                        <div class="card-body text-center py-4">
                             <div class="feature-icon mb-3">
-                                <i class="fas fa-egg fa-3x text-warning"></i>
+                                <i class="fas fa-egg fa-3x text-gold"></i>
                             </div>
                             <h5 class="card-title">Breeding Calculator</h5>
                             <p class="card-text">
-                                Plan optimal breeding strategies with IV inheritance, 
+                                Plan optimal breeding chains with IV inheritance,
                                 nature passing, and egg group compatibility.
                             </p>
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="col-md-6 col-lg-4">
-                    <div class="card h-100 shadow-sm">
-                        <div class="card-body text-center">
+                    <div class="card h-100">
+                        <div class="card-body text-center py-4">
                             <div class="feature-icon mb-3">
-                                <i class="fas fa-trophy fa-3x text-info"></i>
+                                <i class="fas fa-trophy fa-3x" style="color: var(--gc-gold);"></i>
                             </div>
                             <h5 class="card-title">Tournaments</h5>
                             <p class="card-text">
-                                Participate in tournaments with bracket management, 
-                                multiple formats, and leaderboard tracking.
+                                Enter bracket tournaments with multiple formats,
+                                real-time match tracking, and leaderboards.
                             </p>
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="col-md-6 col-lg-4">
-                    <div class="card h-100 shadow-sm">
-                        <div class="card-body text-center">
+                    <div class="card h-100">
+                        <div class="card-body text-center py-4">
                             <div class="feature-icon mb-3">
-                                <i class="fas fa-download fa-3x text-secondary"></i>
+                                <i class="fas fa-download fa-3x" style="color: var(--gc-text-muted);"></i>
                             </div>
                             <h5 class="card-title">Save File Import</h5>
                             <p class="card-text">
-                                Import teams directly from Pokemon game save files 
-                                across multiple generations.
+                                Import teams directly from Pokemon game save files
+                                across GameCube, DS, 3DS, and Switch.
                             </p>
                         </div>
                     </div>
@@ -129,35 +141,71 @@
         </div>
     </div>
 
-    <!-- Statistics Section -->
+    <!-- Shadow Pokemon Feature Callout -->
     <div class="row mb-5">
         <div class="col-lg-12">
-            <div class="card bg-light">
-                <div class="card-body">
-                    <h3 class="text-center mb-4">Community Stats</h3>
+            <div class="card shadow-aura">
+                <div class="card-body p-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-2 text-center mb-3 mb-md-0">
+                            <i class="fas fa-ghost fa-4x" style="color: var(--gc-purple); filter: drop-shadow(0 0 12px var(--gc-purple-glow));"></i>
+                        </div>
+                        <div class="col-md-7">
+                            <h4 class="text-purple mb-2">
+                                <i class="fas fa-bolt me-2"></i>Shadow Pokemon Support
+                            </h4>
+                            <p class="mb-1" style="color: var(--gc-text);">
+                                Full support for GameCube-era Shadow Pokemon mechanics — including shadow levels,
+                                purification progress, the Relic Stone, and exclusive Shadow moves.
+                            </p>
+                            <small style="color: var(--gc-text-muted);">
+                                <i class="fas fa-gamepad me-1"></i>
+                                Pokemon Colosseum &bull; Pokemon XD: Gale of Darkness
+                            </small>
+                        </div>
+                        <div class="col-md-3 text-md-end mt-3 mt-md-0">
+                            <span class="badge type-shadow px-3 py-2 d-block mb-2">SHADOW TYPE</span>
+                            <span class="badge" style="background: var(--gc-surface-2); border: 1px solid var(--gc-border); color: var(--gc-text-muted); font-size:0.65rem; letter-spacing:0.1em;">
+                                CIPHER CORP DETECTED
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Community Stats -->
+    <div class="row mb-5">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-satellite-dish me-2"></i>Network Status
+                </div>
+                <div class="card-body py-4">
                     <div class="row text-center">
                         <div class="col-md-3">
                             <div class="stat-item">
-                                <h4 class="display-6 text-primary fw-bold">{{ users_db|length }}</h4>
-                                <p class="text-muted">Active Users</p>
+                                <h4 class="display-6 text-cyan fw-bold">{{ users_db|length }}</h4>
+                                <p>Registered Trainers</p>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="stat-item">
-                                <h4 class="display-6 text-success fw-bold">{{ teams_db|length }}</h4>
-                                <p class="text-muted">Teams Created</p>
+                                <h4 class="display-6 text-purple fw-bold">{{ teams_db|length }}</h4>
+                                <p>Teams Assembled</p>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="stat-item">
-                                <h4 class="display-6 text-warning fw-bold">15</h4>
-                                <p class="text-muted">Active Tournaments</p>
+                                <h4 class="display-6 text-gold fw-bold">{{ active_tournaments|length }}</h4>
+                                <p>Active Tournaments</p>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="stat-item">
-                                <h4 class="display-6 text-info fw-bold">{{ battles_db|length }}</h4>
-                                <p class="text-muted">Battles Fought</p>
+                                <h4 class="display-6 fw-bold" style="color: var(--gc-danger);">{{ battles_db|length }}</h4>
+                                <p>Battles Logged</p>
                             </div>
                         </div>
                     </div>
@@ -166,47 +214,47 @@
         </div>
     </div>
 
-    <!-- Latest Updates Section -->
+    <!-- Updates + Quick Start -->
     <div class="row">
         <div class="col-lg-8">
             <div class="card">
                 <div class="card-header">
-                    <h5 class="mb-0"><i class="fas fa-newspaper me-2"></i>Latest Updates</h5>
+                    <i class="fas fa-terminal me-2"></i>System Log
                 </div>
                 <div class="card-body">
                     <div class="timeline">
                         <div class="timeline-item">
                             <div class="timeline-marker bg-primary"></div>
                             <div class="timeline-content">
-                                <h6 class="mb-1">Web Interface Launch</h6>
-                                <p class="text-muted mb-1">October 25, 2025</p>
-                                <p class="mb-0">
-                                    Pokemon Team Builder is now available as a web application! 
-                                    Access all your favorite features from any browser.
+                                <h6 class="mb-1">Web Interface Online</h6>
+                                <p class="mb-1" style="font-size:0.78rem; color: var(--gc-text-muted);">October 25, 2025</p>
+                                <p class="mb-0" style="font-size:0.9rem;">
+                                    PTB is now accessible via web browser. All core features
+                                    available from any terminal in the Orre region.
                                 </p>
                             </div>
                         </div>
-                        
+
                         <div class="timeline-item">
-                            <div class="timeline-marker bg-success"></div>
+                            <div class="timeline-marker" style="background: var(--gc-success); border-color: var(--gc-success);"></div>
                             <div class="timeline-content">
-                                <h6 class="mb-1">Tournament System Added</h6>
-                                <p class="text-muted mb-1">October 25, 2025</p>
-                                <p class="mb-0">
-                                    New tournament system with bracket management, 
-                                    multiple formats, and real-time match tracking.
+                                <h6 class="mb-1">Tournament System Deployed</h6>
+                                <p class="mb-1" style="font-size:0.78rem; color: var(--gc-text-muted);">October 25, 2025</p>
+                                <p class="mb-0" style="font-size:0.9rem;">
+                                    Bracket management, multiple formats, and real-time
+                                    match tracking now operational.
                                 </p>
                             </div>
                         </div>
-                        
+
                         <div class="timeline-item">
-                            <div class="timeline-marker bg-warning"></div>
+                            <div class="timeline-marker" style="background: var(--gc-purple); border-color: var(--gc-purple);"></div>
                             <div class="timeline-content">
-                                <h6 class="mb-1">Advanced Breeding Calculator</h6>
-                                <p class="text-muted mb-1">October 25, 2025</p>
-                                <p class="mb-0">
-                                    Enhanced breeding calculator with IV inheritance, 
-                                    egg groups, and optimization algorithms.
+                                <h6 class="mb-1">Shadow Pokemon Module Active</h6>
+                                <p class="mb-1" style="font-size:0.78rem; color: var(--gc-text-muted);">October 25, 2025</p>
+                                <p class="mb-0" style="font-size:0.9rem;">
+                                    Full Colosseum & XD shadow mechanics — purification tracking,
+                                    shadow moves, and Relic Stone support.
                                 </p>
                             </div>
                         </div>
@@ -214,47 +262,53 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="col-lg-4">
             <div class="card">
                 <div class="card-header">
-                    <h5 class="mb-0"><i class="fas fa-star me-2"></i>Quick Start</h5>
+                    <i class="fas fa-map-marker-alt me-2"></i>
+                    {% if current_user %}Trainer Status{% else %}Quick Start{% endif %}
                 </div>
                 <div class="card-body">
                     {% if not current_user %}
-                    <p>Ready to start building the perfect Pokemon team?</p>
-                    <ol class="list-unstyled">
+                    <p style="color: var(--gc-text-muted); font-size:0.9rem;">
+                        Access the PTB network to start building your team.
+                    </p>
+                    <ol class="list-unstyled mb-4">
                         <li class="mb-2">
-                            <i class="fas fa-user-plus text-primary me-2"></i>
-                            <a href="{{ url_for('login') }}">Create an account</a>
+                            <i class="fas fa-user-plus text-cyan me-2"></i>
+                            <a href="{{ url_for('login') }}">Register your trainer ID</a>
                         </li>
                         <li class="mb-2">
-                            <i class="fas fa-users text-success me-2"></i>
-                            Build your first team
+                            <i class="fas fa-users text-purple me-2"></i>
+                            Assemble your team
                         </li>
                         <li class="mb-2">
-                            <i class="fas fa-chart-line text-info me-2"></i>
-                            Analyze and optimize
+                            <i class="fas fa-chart-line text-cyan me-2"></i>
+                            Run tactical analysis
                         </li>
                         <li class="mb-2">
-                            <i class="fas fa-trophy text-warning me-2"></i>
-                            Enter tournaments
+                            <i class="fas fa-trophy text-gold me-2"></i>
+                            Enter the tournament circuit
                         </li>
                     </ol>
                     <a href="{{ url_for('login') }}" class="btn btn-primary w-100">
-                        <i class="fas fa-rocket me-2"></i>Get Started Now
+                        <i class="fas fa-sign-in-alt me-2"></i>Access Terminal
                     </a>
                     {% else %}
-                    <p>Welcome back, {{ current_user.username }}!</p>
+                    <p style="color: var(--gc-text-muted); font-size:0.85rem; font-family: 'Orbitron', monospace; letter-spacing:0.05em;">
+                        TRAINER AUTHENTICATED
+                    </p>
+                    <p class="text-cyan fw-bold mb-3">{{ current_user.username }}</p>
                     <div class="d-grid gap-2">
                         <a href="{{ url_for('team_builder') }}" class="btn btn-primary">
                             <i class="fas fa-users me-2"></i>Build New Team
                         </a>
-                        <a href="{{ url_for('tournaments') }}" class="btn btn-success">
-                            <i class="fas fa-trophy me-2"></i>Join Tournament
-                        </a>
                         <a href="{{ url_for('battle') }}" class="btn btn-danger">
-                            <i class="fas fa-sword me-2"></i>Battle Now
+                            <i class="fas fa-bolt me-2"></i>Enter Battle
+                        </a>
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-info">
+                            <i class="fas fa-tachometer-alt me-2"></i>Command Center
                         </a>
                     </div>
                     {% endif %}
@@ -262,29 +316,25 @@
             </div>
         </div>
     </div>
+
 </div>
 {% endblock %}
 
 {% block scripts %}
 <script>
-    // Add some interactive elements
+    // Animate stat counters with GameCube-style rapid count-up
     document.addEventListener('DOMContentLoaded', function() {
-        // Animate statistics counters
-        const counters = document.querySelectorAll('.display-6');
+        const counters = document.querySelectorAll('.stat-item .display-6');
         counters.forEach(counter => {
-            const target = parseInt(counter.textContent);
+            const target = parseInt(counter.textContent) || 0;
+            if (target === 0) return;
             let current = 0;
-            const increment = target / 50;
-            
+            const increment = Math.max(1, Math.ceil(target / 40));
             const timer = setInterval(() => {
-                current += increment;
-                if (current >= target) {
-                    counter.textContent = target;
-                    clearInterval(timer);
-                } else {
-                    counter.textContent = Math.floor(current);
-                }
-            }, 20);
+                current = Math.min(current + increment, target);
+                counter.textContent = current;
+                if (current >= target) clearInterval(timer);
+            }, 18);
         });
     });
 </script>

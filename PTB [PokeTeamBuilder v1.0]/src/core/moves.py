@@ -63,13 +63,13 @@ class MoveEffect:
     
     def __post_init__(self):
         """Validate effect parameters."""
-        if not isinstance(effect_type, str) or not effect_type.strip():
+        if not isinstance(self.effect_type, str) or not self.effect_type.strip():
             raise ValueError("Effect type must be a non-empty string")
         
-        if not isinstance(effect_chance, float) or effect_chance < 0.0 or effect_chance > 1.0:
+        if not isinstance(self.effect_chance, float) or self.effect_chance < 0.0 or self.effect_chance > 1.0:
             raise ValueError("Effect chance must be between 0.0 and 1.0")
         
-        if not isinstance(effect_value, int):
+        if not isinstance(self.effect_value, int):
             raise ValueError("Effect value must be an integer")
 
 

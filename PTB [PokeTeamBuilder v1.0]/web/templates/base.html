@@ -1,31 +1,32 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-bs-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Pokemon Team Builder{% endblock %}</title>
-    
+    <title>{% block title %}PTB — Orre Region Team Builder{% endblock %}</title>
+
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <!-- Custom CSS -->
+    <!-- GameCube / Orre Theme CSS -->
     <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
-    
+
     {% block head %}{% endblock %}
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <!-- Navigation — Cipher Corp style header -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container">
             <a class="navbar-brand" href="{{ url_for('index') }}">
-                <i class="fas fa-dragon me-2"></i>Pokemon Team Builder
+                <i class="fas fa-bolt me-2"></i>PTB<span class="text-muted fw-light" style="font-size:0.7em; letter-spacing:0.15em;"> // ORRE REGION</span>
             </a>
-            
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            
+
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
@@ -51,40 +52,50 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('battle') }}">
-                            <i class="fas fa-sword me-1"></i>Battle
+                            <i class="fas fa-bolt me-1"></i>Battle
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="alert('Breeding system coming soon!')">
+                        <a class="nav-link" href="{{ url_for('memory_card') }}">
+                            <i class="fas fa-sd-card me-1"></i>Memory Card
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('gba_support') }}">
+                            <i class="fas fa-gamepad me-1"></i>GBA Link
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link disabled text-muted" href="#" aria-disabled="true" title="Coming soon">
                             <i class="fas fa-egg me-1"></i>Breeding
                         </a>
                     </li>
                     {% endif %}
                     <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="alert('Tournaments feature coming soon!')">
+                        <a class="nav-link disabled text-muted" href="#" aria-disabled="true" title="Coming soon">
                             <i class="fas fa-trophy me-1"></i>Tournaments
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="alert('Leaderboard feature coming soon!')">
+                        <a class="nav-link disabled text-muted" href="#" aria-disabled="true" title="Coming soon">
                             <i class="fas fa-medal me-1"></i>Leaderboard
                         </a>
                     </li>
                 </ul>
-                
+
                 <ul class="navbar-nav">
                     {% if current_user %}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-user me-1"></i>{{ current_user.username }}
+                            <i class="fas fa-user-astronaut me-1"></i>{{ current_user.username }}
                         </a>
-                        <ul class="dropdown-menu">
+                        <ul class="dropdown-menu dropdown-menu-end">
                             <li><a class="dropdown-item" href="{{ url_for('dashboard') }}">
-                                <i class="fas fa-user-circle me-1"></i>Profile
+                                <i class="fas fa-id-card me-2"></i>Profile
                             </a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{{ url_for('logout') }}">
-                                <i class="fas fa-sign-out-alt me-1"></i>Logout
+                            <li><a class="dropdown-item text-danger" href="{{ url_for('logout') }}">
+                                <i class="fas fa-sign-out-alt me-2"></i>Logout
                             </a></li>
                         </ul>
                     </li>
@@ -106,6 +117,7 @@
             <div class="container mt-3">
                 {% for category, message in messages %}
                     <div class="alert alert-{{ 'success' if category == 'success' else 'danger' if category == 'error' else 'info' }} alert-dismissible fade show">
+                        <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-triangle' if category == 'error' else 'info-circle' }} me-2"></i>
                         {{ message }}
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
@@ -119,19 +131,29 @@
         {% block content %}{% endblock %}
     </main>
 
-    <!-- Footer -->
-    <footer class="bg-dark text-light py-4 mt-5">
+    <!-- Footer — Relic Stone inscription style -->
+    <footer class="py-4 mt-5">
         <div class="container">
-            <div class="row">
-                <div class="col-md-6">
-                    <h5><i class="fas fa-dragon me-2"></i>Pokemon Team Builder</h5>
-                    <p class="mb-0">Build, analyze, and optimize Pokemon teams for all generations!</p>
-                </div>
-                <div class="col-md-6 text-md-end">
-                    <p class="mb-0">
-                        <small>Created with ❤️ for Pokemon fans everywhere</small><br>
-                        <small class="text-muted">Version 1.0 - Web Edition</small>
+            <div class="row align-items-center">
+                <div class="col-md-5">
+                    <h5 class="mb-1">
+                        <i class="fas fa-bolt me-2"></i>PTB // ORRE REGION
+                    </h5>
+                    <p class="mb-0" style="font-size:0.85rem;">
+                        Build, analyze, and purify your team — from Phenac City to the Cipher Lab.
                     </p>
+                </div>
+                <div class="col-md-4 text-md-center my-2 my-md-0">
+                    <small class="text-muted d-block">
+                        <i class="fas fa-gamepad me-1"></i>
+                        Colosseum &bull; XD: Gale of Darkness &bull; All Generations
+                    </small>
+                </div>
+                <div class="col-md-3 text-md-end">
+                    <small class="text-muted d-block">Version 1.0 — Web Edition</small>
+                    <small class="text-muted">
+                        <i class="fas fa-shield-alt me-1"></i>Snag Machine Active
+                    </small>
                 </div>
             </div>
         </div>
@@ -143,7 +165,7 @@
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <!-- Custom JS -->
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-    
+
     {% block scripts %}{% endblock %}
 </body>
 </html>

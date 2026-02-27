@@ -50,13 +50,13 @@ class GameCubeTrading(BaseTradingInterface):
         if method == TradingMethod.GAMECUBE_LINK_CABLE:
             # Simulate link cable connection
             self.link_cable_connected = True
-            print("GameCube Link Cable connected")
+            logger.info("GameCube Link Cable connected")
             return True
         
         elif method == TradingMethod.GAMECUBE_WIRELESS:
             # Simulate wireless adapter connection
             self.wireless_adapter_connected = True
-            print("GameCube Wireless Adapter connected")
+            logger.info("GameCube Wireless Adapter connected")
             return True
         
         return False
@@ -79,7 +79,7 @@ class GameCubeTrading(BaseTradingInterface):
         )
         
         self.active_sessions[session_id] = session
-        print(f"GameCube trading session created: {session_id}")
+        logger.info(f"GameCube trading session created: {session_id}")
         return session
     
     def join_trading_session(self, session_id: str) -> bool:
@@ -92,7 +92,7 @@ class GameCubeTrading(BaseTradingInterface):
             return False
         
         session.participants.append(f"Player_{len(session.participants) + 1}")
-        print(f"Joined GameCube trading session: {session_id}")
+        logger.info(f"Joined GameCube trading session: {session_id}")
         return True
     
     def send_pokemon(self, session_id: str, pokemon: Pokemon) -> bool:
@@ -107,7 +107,7 @@ class GameCubeTrading(BaseTradingInterface):
         # Validate Pokemon for GameCube trading
         issues = self.validate_pokemon_for_trading(pokemon)
         if issues:
-            print(f"Cannot trade {pokemon.name}: {', '.join(issues)}")
+            logger.warning(f"Cannot trade {pokemon.name}: {', '.join(issues)}")
             return False
         
         # GameCube-specific validation
@@ -118,7 +118,7 @@ class GameCubeTrading(BaseTradingInterface):
                     print(f"Shadow Pokemon {pokemon.name} cannot be traded while shadowed")
                     return False
         
-        print(f"Sent {pokemon.name} via GameCube trading")
+        logger.info(f"Sent {pokemon.name} via GameCube trading")
         return True
     
     def receive_pokemon(self, session_id: str) -> Optional[Pokemon]:
@@ -132,7 +132,7 @@ class GameCubeTrading(BaseTradingInterface):
         
         # Simulate receiving a Pokemon
         # In a real implementation, this would receive actual Pokemon data
-        print("Received Pokemon via GameCube trading")
+        logger.info("Received Pokemon via GameCube trading")
         return None
     
     def close_session(self, session_id: str) -> bool:
@@ -142,7 +142,7 @@ class GameCubeTrading(BaseTradingInterface):
         
         session = self.active_sessions[session_id]
         session.is_active = False
-        print(f"Closed GameCube trading session: {session_id}")
+        logger.info(f"Closed GameCube trading session: {session_id}")
         return True
     
     def transfer_to_pokemon_box(self, pokemon: Pokemon) -> bool:
@@ -153,10 +153,10 @@ class GameCubeTrading(BaseTradingInterface):
         # Validate Pokemon for Pokemon Box
         issues = self.validate_pokemon_for_trading(pokemon)
         if issues:
-            print(f"Cannot transfer {pokemon.name} to Pokemon Box: {', '.join(issues)}")
+            logger.warning(f"Cannot transfer {pokemon.name} to Pokemon Box: {', '.join(issues)}")
             return False
         
-        print(f"Transferred {pokemon.name} to Pokemon Box")
+        logger.info(f"Transferred {pokemon.name} to Pokemon Box")
         return True
     
     def transfer_from_pokemon_box(self, pokemon_id: int) -> Optional[Pokemon]:
@@ -165,7 +165,7 @@ class GameCubeTrading(BaseTradingInterface):
             return None
         
         # Simulate retrieving Pokemon from Box
-        print(f"Retrieved Pokemon {pokemon_id} from Pokemon Box")
+        logger.info(f"Retrieved Pokemon {pokemon_id} from Pokemon Box")
         return None
     
     def purify_shadow_pokemon(self, shadow_pokemon: ShadowPokemon) -> bool:
@@ -177,12 +177,12 @@ class GameCubeTrading(BaseTradingInterface):
             return False
         
         if shadow_pokemon.shadow_level <= 0:
-            print(f"{shadow_pokemon.name} is not a Shadow Pokemon")
+            logger.warning(f"{shadow_pokemon.name} is not a Shadow Pokemon")
             return False
         
         # Simulate purification process
         shadow_pokemon.shadow_level = 0
-        print(f"Purified Shadow Pokemon {shadow_pokemon.name}")
+        logger.info(f"Purified Shadow Pokemon {shadow_pokemon.name}")
         return True
     
     def get_shadow_pokemon_list(self) -> List[ShadowPokemon]:

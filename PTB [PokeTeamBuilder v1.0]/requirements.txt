@@ -1,20 +1,39 @@
-pillow>=9.0.0
-requests>=2.28.0
-json5>=0.9.0
+# ============================================================
+# PTB — Pokémon Team Builder v1.0
+# Python Dependencies
+# ============================================================
+
+# ── Core ──────────────────────────────────────────────────────
+pillow>=9.0.0,<11.0.0
+requests>=2.28.0,<3.0.0
 typing-extensions>=4.0.0
-dataclasses-json>=0.5.7
-pydantic>=1.10.0
-numpy>=1.21.0
-pandas>=1.4.0
+dataclasses-json>=0.5.7,<1.0.0
+pydantic>=1.10.0,<3.0.0
 colorama>=0.4.6
 rich>=12.0.0
 
-# Web Interface Dependencies
-Flask==2.3.3
-Flask-CORS==4.0.0
-Flask-SocketIO==5.3.6
-python-socketio==5.8.0
-eventlet==0.33.3
-Werkzeug==2.3.7
-python-engineio==4.7.1
+# ── Web Interface ─────────────────────────────────────────────
+Flask>=2.3.0,<3.0.0
+Flask-CORS>=4.0.0
+Flask-SocketIO>=5.3.0
+python-socketio>=5.8.0
+python-engineio>=4.7.0
+Werkzeug>=2.3.0,<3.0.0
+eventlet>=0.33.0
+
+# ── Production Server ─────────────────────────────────────────
+gunicorn>=21.0.0
+
+# ── Environment & Config ──────────────────────────────────────
+python-dotenv>=1.0.0
+
+# ── Security ──────────────────────────────────────────────────
+bcrypt>=4.0.0
+
+# ── Data Processing ───────────────────────────────────────────
+numpy>=1.21.0
+pandas>=1.4.0
+
+# ── Utilities ─────────────────────────────────────────────────
 bidict>=0.22.0
+python-dateutil>=2.8.0

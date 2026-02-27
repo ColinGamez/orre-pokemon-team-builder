@@ -1,52 +1,60 @@
 {% extends "base.html" %}
 
-{% block title %}Login - Pokemon Team Builder{% endblock %}
+{% block title %}PTB — Trainer Authentication{% endblock %}
 
 {% block content %}
 <div class="container">
-    <div class="row justify-content-center">
+    <div class="row justify-content-center mt-4">
         <div class="col-md-6 col-lg-4">
-            <div class="card shadow">
+
+            <!-- Terminal-style login card -->
+            <div class="card shadow-custom">
+                <div class="card-header text-center">
+                    <i class="fas fa-terminal me-2"></i>TRAINER AUTHENTICATION
+                </div>
                 <div class="card-body p-4">
                     <div class="text-center mb-4">
-                        <i class="fas fa-dragon fa-3x text-primary mb-3"></i>
-                        <h3>Welcome Back</h3>
-                        <p class="text-muted">Sign in to Pokemon Team Builder</p>
+                        <i class="fas fa-bolt fa-3x mb-3" style="color: var(--gc-purple); filter: drop-shadow(0 0 12px var(--gc-purple-glow));"></i>
+                        <h4 class="mb-1">Access Terminal</h4>
+                        <p class="text-muted" style="font-size:0.82rem; letter-spacing:0.05em;">
+                            Enter your trainer ID to access the PTB network
+                        </p>
                     </div>
-                    
+
                     <form method="POST">
-                        <div class="mb-3">
-                            <label for="username" class="form-label">Username</label>
+                        <div class="mb-4">
+                            <label for="username" class="form-label">Trainer ID</label>
                             <div class="input-group">
                                 <span class="input-group-text">
-                                    <i class="fas fa-user"></i>
+                                    <i class="fas fa-user-astronaut"></i>
                                 </span>
-                                <input type="text" class="form-control" id="username" name="username" 
-                                       placeholder="Enter your username" required>
+                                <input type="text" class="form-control" id="username" name="username"
+                                       placeholder="Enter trainer ID" required autofocus>
                             </div>
                         </div>
-                        
+
                         <div class="d-grid">
                             <button type="submit" class="btn btn-primary btn-lg">
-                                <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                                <i class="fas fa-sign-in-alt me-2"></i>Authenticate
                             </button>
                         </div>
                     </form>
-                    
+
                     <div class="text-center mt-4">
                         <small class="text-muted">
                             <i class="fas fa-info-circle me-1"></i>
-                            New users will be automatically registered
+                            New trainers are registered automatically
                         </small>
                     </div>
                 </div>
             </div>
-            
+
             <div class="text-center mt-4">
-                <a href="{{ url_for('index') }}" class="text-decoration-none">
-                    <i class="fas fa-arrow-left me-1"></i>Back to Home
+                <a href="{{ url_for('index') }}" style="font-size:0.82rem; letter-spacing:0.05em;">
+                    <i class="fas fa-arrow-left me-1"></i>Return to Home
                 </a>
             </div>
+
         </div>
     </div>
 </div>

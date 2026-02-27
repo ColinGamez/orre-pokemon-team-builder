@@ -8,6 +8,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 import json
 from datetime import datetime
+import logging
 
 from ..core.pokemon import Pokemon, ShadowPokemon
 from ..core.types import PokemonType
@@ -343,8 +344,6 @@ class PokemonTeam:
             position: Specific position (None for first available)
             nickname: Custom nickname
             item: Held item
-            nickname: Custom nickname
-            item: Held item
             
         Returns:
             True if Pokemon was added successfully
@@ -531,7 +530,8 @@ class PokemonTeam:
                 json.dump(self.to_dict(), f, indent=2)
             return True
         except Exception as e:
-            print(f"Error saving team: {e}")
+            logger = logging.getLogger(__name__)
+            logger.error(f"Error saving team: {e}")
             return False
     
     @classmethod
@@ -553,9 +553,48 @@ class PokemonTeam:
             # Load Pokemon into slots
             for i, slot_data in enumerate(data['slots']):
                 if slot_data['pokemon']:
-                    # Reconstruct Pokemon object (simplified)
-                    # In a full implementation, you'd need to reconstruct all Pokemon properties
-                    pass
+                    # Reconstruct Pokemon from saved data
+                    p_data = slot_data['pokemon']
+                    from ..core.pokemon import PokemonStats, PokemonEV, PokemonIV, PokemonNature, PokemonStatus
+                    base_stats = PokemonStats(**p_data.get('base_stats', {}))
+                    evs = PokemonEV(**p_data.get('evs', {}))
+                    ivs = PokemonIV(**p_data.get('ivs', {}))
+                    is_shadow = p_data.get('is_shadow', False)
+                    if is_shadow:
+                        from ..core.pokemon import ShadowPokemon
+                        pokemon = ShadowPokemon(
+                            name=p_data['name'],
+                            species_id=p_data['species_id'],
+                            level=p_data['level'],
+                            nature=PokemonNature(p_data['nature']),
+                            base_stats=base_stats,
+                            evs=evs,
+                            ivs=ivs,
+                            moves=p_data.get('moves', []),
+                            ability=p_data.get('ability'),
+                            shadow_level=p_data.get('shadow_level', 1),
+                            purification_progress=p_data.get('purification_progress', 0.0)
+                        )
+                    else:
+                        pokemon = Pokemon(
+                            name=p_data['name'],
+                            species_id=p_data['species_id'],
+                            level=p_data['level'],
+                            nature=PokemonNature(p_data['nature']),
+                            base_stats=base_stats,
+                            evs=evs,
+                            ivs=ivs,
+                            moves=p_data.get('moves', []),
+                            ability=p_data.get('ability'),
+                            status=PokemonStatus(p_data.get('status', 'normal')),
+                            game_era=p_data.get('game_era', 'modern')
+                        )
+                    team.add_pokemon(
+                        pokemon,
+                        position=i,
+                        nickname=slot_data.get('nickname'),
+                        item=slot_data.get('item')
+                    )
             
             return team
         except Exception as e:

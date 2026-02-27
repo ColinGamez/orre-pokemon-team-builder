@@ -347,7 +347,7 @@ class TeamAnalyzer:
         for pokemon in self.active_pokemon:
             # Check Pokemon era compatibility
             if hasattr(pokemon, 'shadow_level') and pokemon.shadow_level > 0:
-                if self.team.era != TeamEra.GAMECUBE:
+                if self.team.era not in [TeamEra.GAMECUBE, TeamEra.COLOSSEUM, TeamEra.XD_GALE]:
                     compatibility_issues.append(f"{pokemon.name} is a Shadow Pokemon (GameCube era only)")
                 else:
                     era_specific_features.append(f"{pokemon.name} uses Shadow mechanics")
@@ -364,7 +364,7 @@ class TeamAnalyzer:
                     move_name = move
                     is_shadow_move = 'shadow' in move_name.lower()
                 
-                if is_shadow_move and self.team.era != TeamEra.GAMECUBE:
+                if is_shadow_move and self.team.era not in [TeamEra.GAMECUBE, TeamEra.COLOSSEUM, TeamEra.XD_GALE]:
                     compatibility_issues.append(f"{pokemon.name} has Shadow move {move_name} (GameCube era only)")
                 elif is_shadow_move:
                     era_specific_features.append(f"{pokemon.name} uses Shadow move {move_name}")
@@ -425,55 +425,24 @@ class TeamAnalyzer:
         return synergy_type, conflict_type
     
     def _has_type_advantage(self, defending_type: str, attacking_type: str) -> bool:
-        """Check if defending type has advantage over attacking type."""
-        # Simplified type advantage check
-        type_advantages = {
-            'fire': ['grass', 'ice', 'bug', 'steel'],
-            'water': ['fire', 'ground', 'rock'],
-            'grass': ['water', 'ground', 'rock'],
-            'electric': ['water', 'flying'],
-            'ice': ['grass', 'ground', 'flying', 'dragon'],
-            'fighting': ['normal', 'ice', 'rock', 'dark', 'steel'],
-            'poison': ['grass', 'fairy'],
-            'ground': ['fire', 'electric', 'poison', 'rock', 'steel'],
-            'flying': ['grass', 'fighting', 'bug'],
-            'psychic': ['fighting', 'poison'],
-            'bug': ['grass', 'psychic', 'dark'],
-            'rock': ['fire', 'ice', 'flying', 'bug'],
-            'ghost': ['psychic', 'ghost'],
-            'dragon': ['dragon'],
-            'dark': ['psychic', 'ghost'],
-            'steel': ['ice', 'rock', 'fairy'],
-            'fairy': ['fighting', 'dragon', 'dark']
-        }
-        
-        return attacking_type in type_advantages.get(defending_type, [])
-    
+        """Check if defending type resists the attacking type using the canonical type chart."""
+        try:
+            atk = PokemonType(attacking_type)
+            dfn = PokemonType(defending_type)
+            effectiveness, _ = TypeEffectiveness.calculate_effectiveness(atk, [dfn])
+            return effectiveness > 1.0
+        except ValueError:
+            return False
+
     def _get_type_weaknesses(self, pokemon_type: str) -> List[str]:
-        """Get weaknesses for a given type."""
-        # Simplified weakness chart
-        weaknesses = {
-            'fire': ['water', 'ground', 'rock'],
-            'water': ['electric', 'grass'],
-            'grass': ['fire', 'ice', 'poison', 'flying', 'bug'],
-            'electric': ['ground'],
-            'ice': ['fire', 'fighting', 'rock', 'steel'],
-            'fighting': ['flying', 'psychic', 'fairy'],
-            'poison': ['ground', 'psychic'],
-            'ground': ['water', 'grass', 'ice'],
-            'flying': ['electric', 'ice', 'rock'],
-            'psychic': ['bug', 'ghost', 'dark'],
-            'bug': ['fire', 'flying', 'rock'],
-            'rock': ['water', 'grass', 'fighting', 'ground', 'steel'],
-            'ghost': ['ghost', 'dark'],
-            'dragon': ['ice', 'dragon', 'fairy'],
-            'dark': ['fighting', 'bug', 'fairy'],
-            'steel': ['fire', 'fighting', 'ground'],
-            'fairy': ['poison', 'steel']
-        }
-        
-        return weaknesses.get(pokemon_type, [])
-    
+        """Get weaknesses for a given type using the canonical type chart."""
+        try:
+            dfn = PokemonType(pokemon_type)
+            weaknesses = TypeEffectiveness.get_weaknesses([dfn])
+            return [t.value for t in weaknesses.keys()]
+        except ValueError:
+            return []
+
     def _calculate_stat_balance(self, stat_distribution: Dict[str, List[int]]) -> float:
         """Calculate how balanced the team's stats are."""
         if not stat_distribution:

@@ -239,35 +239,38 @@ class Pokemon:
     
     def _get_nature_modifiers(self) -> Dict[str, float]:
         """Get stat modifiers for the Pokemon's nature."""
+        # Each nature boosts one stat by 10% and reduces another by 10%.
+        # Neutral natures (HARDY, DOCILE, SERIOUS, BASHFUL, QUIRKY) have no effect.
+        NATURE_TABLE = {
+            PokemonNature.LONELY:   ('attack',         'defense'),
+            PokemonNature.BRAVE:    ('attack',         'speed'),
+            PokemonNature.ADAMANT:  ('attack',         'special_attack'),
+            PokemonNature.NAUGHTY:  ('attack',         'special_defense'),
+            PokemonNature.BOLD:     ('defense',        'attack'),
+            PokemonNature.RELAXED:  ('defense',        'speed'),
+            PokemonNature.IMPISH:   ('defense',        'special_attack'),
+            PokemonNature.LAX:      ('defense',        'special_defense'),
+            PokemonNature.MODEST:   ('special_attack', 'attack'),
+            PokemonNature.MILD:     ('special_attack', 'defense'),
+            PokemonNature.QUIET:    ('special_attack', 'speed'),
+            PokemonNature.RASH:     ('special_attack', 'special_defense'),
+            PokemonNature.CALM:     ('special_defense', 'attack'),
+            PokemonNature.GENTLE:   ('special_defense', 'defense'),
+            PokemonNature.SASSY:    ('special_defense', 'speed'),
+            PokemonNature.CAREFUL:  ('special_defense', 'special_attack'),
+            PokemonNature.TIMID:    ('speed',           'attack'),
+            PokemonNature.HASTY:    ('speed',           'defense'),
+            PokemonNature.JOLLY:    ('speed',           'special_attack'),
+            PokemonNature.NAIVE:    ('speed',           'special_defense'),
+        }
         nature_modifiers = {
             'attack': 1.0, 'defense': 1.0, 'special_attack': 1.0,
             'special_defense': 1.0, 'speed': 1.0
         }
-        
-        # Nature stat modifications (simplified - real games have specific nature effects)
-        if self.nature in [PokemonNature.LONELY, PokemonNature.BRAVE, PokemonNature.ADAMANT, PokemonNature.NAUGHTY]:
-            nature_modifiers['attack'] = 1.1
-        elif self.nature in [PokemonNature.BOLD, PokemonNature.RELAXED, PokemonNature.IMPISH, PokemonNature.LAX]:
-            nature_modifiers['defense'] = 1.1
-        elif self.nature in [PokemonNature.MODEST, PokemonNature.MILD, PokemonNature.QUIET, PokemonNature.RASH]:
-            nature_modifiers['special_attack'] = 1.1
-        elif self.nature in [PokemonNature.CALM, PokemonNature.GENTLE, PokemonNature.SASSY, PokemonNature.CAREFUL]:
-            nature_modifiers['special_defense'] = 1.1
-        elif self.nature in [PokemonNature.TIMID, PokemonNature.HASTY, PokemonNature.JOLLY, PokemonNature.NAIVE]:
-            nature_modifiers['speed'] = 1.1
-        
-        # Apply corresponding decreases
-        if self.nature in [PokemonNature.BOLD, PokemonNature.MODEST, PokemonNature.CALM, PokemonNature.TIMID]:
-            nature_modifiers['attack'] = 0.9
-        elif self.nature in [PokemonNature.LONELY, PokemonNature.MILD, PokemonNature.GENTLE, PokemonNature.HASTY]:
-            nature_modifiers['defense'] = 0.9
-        elif self.nature in [PokemonNature.BRAVE, PokemonNature.RELAXED, PokemonNature.SASSY, PokemonNature.QUIET]:
-            nature_modifiers['special_attack'] = 0.9
-        elif self.nature in [PokemonNature.ADAMANT, PokemonNature.IMPISH, PokemonNature.CAREFUL, PokemonNature.JOLLY]:
-            nature_modifiers['special_defense'] = 0.9
-        elif self.nature in [PokemonNature.NAUGHTY, PokemonNature.LAX, PokemonNature.RASH, PokemonNature.NAIVE]:
-            nature_modifiers['speed'] = 0.9
-        
+        if self.nature in NATURE_TABLE:
+            boosted, reduced = NATURE_TABLE[self.nature]
+            nature_modifiers[boosted] = 1.1
+            nature_modifiers[reduced] = 0.9
         return nature_modifiers
     
     def add_move(self, move_name: str) -> bool:

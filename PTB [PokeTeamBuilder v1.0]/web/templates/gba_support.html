@@ -1,0 +1,503 @@
+{% extends "base.html" %}
+
+{% block title %}PTB — GBA Link Cable{% endblock %}
+
+{% block content %}
+<div class="container">
+
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex align-items-center gap-3 mb-2">
+                <i class="fas fa-gamepad fa-2x text-gold" style="filter: drop-shadow(0 0 8px var(--gc-gold-glow));"></i>
+                <div>
+                    <h2 class="mb-0">GBA Link Cable</h2>
+                    <small class="text-muted" style="letter-spacing:0.1em;">
+                        GAME BOY ADVANCE // GEN 3 SAVE SUPPORT
+                    </small>
+                </div>
+            </div>
+            <div class="alert alert-info mb-0">
+                <i class="fas fa-info-circle me-2"></i>
+                Import <strong>.sav</strong> files from Pokemon Ruby, Sapphire, Emerald, FireRed, or LeafGreen.
+                Transfer Pokemon to your Colosseum/XD team via the simulated GBA link cable.
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+
+        <!-- Left: Import + Game Info -->
+        <div class="col-lg-4">
+
+            <!-- Upload GBA Save -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <i class="fas fa-upload me-2"></i>Import GBA Save
+                </div>
+                <div class="card-body">
+                    <form id="gbaUploadForm" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label class="form-label">Select .sav file</label>
+                            <input type="file" class="form-control" id="gbaSaveFile"
+                                   accept=".sav,.SAV" required>
+                            <div class="form-text text-muted" style="font-size:0.78rem;">
+                                Ruby, Sapphire, Emerald, FireRed, LeafGreen — all regions
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-plug me-2"></i>Connect GBA
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- GBA Game Info (shown after load) -->
+            <div class="card mb-3" id="gbaInfoCard" style="display:none;">
+                <div class="card-header">
+                    <i class="fas fa-id-card me-2"></i>Trainer Data
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-sm mb-0">
+                        <tr>
+                            <td class="text-muted ps-3" style="font-size:0.8rem; width:40%;">Game</td>
+                            <td id="gbaGameName" style="font-size:0.8rem;"></td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted ps-3" style="font-size:0.8rem;">Trainer</td>
+                            <td id="gbaTrainerName" style="font-size:0.8rem;"></td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted ps-3" style="font-size:0.8rem;">Trainer ID</td>
+                            <td id="gbaTrainerId" style="font-size:0.8rem;"></td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted ps-3" style="font-size:0.8rem;">Play Time</td>
+                            <td id="gbaPlayTime" style="font-size:0.8rem;"></td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted ps-3" style="font-size:0.8rem;">Badges</td>
+                            <td id="gbaBadges" style="font-size:0.8rem;"></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Shadow Pokemon Reference -->
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-ghost me-2"></i>Shadow Pokemon
+                    <select class="form-select form-select-sm ms-2 d-inline-block w-auto"
+                            id="shadowGameSelect" onchange="loadShadowList()">
+                        <option value="colosseum">Colosseum</option>
+                        <option value="xd_gale">XD: Gale of Darkness</option>
+                    </select>
+                </div>
+                <div class="card-body p-0" style="max-height:300px; overflow-y:auto;">
+                    <div id="shadowList" class="p-2">
+                        <div class="text-center text-muted py-3" style="font-size:0.82rem;">
+                            Loading shadow list...
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Right: Pokemon Viewer -->
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span><i class="fas fa-gamepad me-2"></i><span id="viewerTitle">No GBA Connected</span></span>
+                    <div id="viewerTabs" style="display:none;">
+                        <button class="btn btn-sm btn-primary me-1" onclick="showTab('party')" id="tabParty">
+                            <i class="fas fa-users me-1"></i>Party
+                        </button>
+                        <button class="btn btn-sm btn-secondary" onclick="showTab('boxes')" id="tabBoxes">
+                            <i class="fas fa-box me-1"></i>PC Boxes
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body" id="viewerBody">
+
+                    <!-- Empty state -->
+                    <div id="emptyState" class="text-center py-5">
+                        <i class="fas fa-gamepad fa-4x mb-3" style="color: var(--gc-border);"></i>
+                        <p class="text-muted">Connect a GBA save file to view Pokemon.</p>
+                        <p class="text-muted" style="font-size:0.8rem; font-family:'Orbitron',monospace; letter-spacing:0.1em;">
+                            AWAITING GBA LINK CABLE
+                        </p>
+                    </div>
+
+                    <!-- Party view -->
+                    <div id="partyView" style="display:none;">
+                        <div class="row g-2" id="partyGrid"></div>
+                    </div>
+
+                    <!-- Boxes view -->
+                    <div id="boxesView" style="display:none;">
+                        <div class="mb-3">
+                            <select class="form-select form-select-sm w-auto" id="boxSelect"
+                                    onchange="renderBox()">
+                            </select>
+                        </div>
+                        <div class="row g-2" id="boxGrid"></div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Transfer Log -->
+            <div class="card mt-3" id="transferLogCard" style="display:none;">
+                <div class="card-header">
+                    <i class="fas fa-exchange-alt me-2"></i>Transfer Log
+                </div>
+                <div class="card-body p-0" style="max-height:200px; overflow-y:auto;">
+                    <table class="table table-sm mb-0" id="transferLogTable">
+                        <thead>
+                            <tr>
+                                <th>Pokemon</th>
+                                <th>Direction</th>
+                                <th>Result</th>
+                                <th>Time</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transferLogBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Pokemon Detail Modal -->
+<div class="modal fade" id="pokemonModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="pokemonModalTitle">Pokemon Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="pokemonModalBody"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="transferToGCNBtn"
+                        onclick="transferToGCN()">
+                    <i class="fas fa-arrow-right me-2"></i>Transfer to GCN
+                </button>
+                <button type="button" class="btn btn-success" id="addToTeamBtn"
+                        onclick="addToTeamBuilder()">
+                    <i class="fas fa-users me-2"></i>Add to Team Builder
+                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let currentSave = null;
+let currentPokemon = null;
+let currentSessionId = null;
+let activeTab = 'party';
+
+// ── Upload GBA Save ────────────────────────────────────────────────────────────
+document.getElementById('gbaUploadForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const file = document.getElementById('gbaSaveFile').files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('sav_file', file);
+
+    try {
+        const resp = await fetch('/api/gba/import-save', {method:'POST', body: formData});
+        const data = await resp.json();
+        if (data.success) {
+            currentSave = data.save;
+            currentSessionId = data.session_id;
+            showSave(data.save);
+            showAlert('success', `Connected: ${data.save.info.game_name} — ${data.save.info.trainer_name}`);
+        } else {
+            showAlert('danger', data.error || 'Import failed');
+        }
+    } catch(err) {
+        showAlert('danger', 'Network error: ' + err.message);
+    }
+});
+
+// ── Show Save Data ─────────────────────────────────────────────────────────────
+function showSave(save) {
+    const info = save.info;
+
+    // Update trainer info card
+    document.getElementById('gbaInfoCard').style.display = 'block';
+    document.getElementById('gbaGameName').textContent    = info.game_name || '—';
+    document.getElementById('gbaTrainerName').textContent = info.trainer_name || '—';
+    document.getElementById('gbaTrainerId').textContent   = info.trainer_id || '—';
+    document.getElementById('gbaPlayTime').textContent    =
+        `${info.play_time_h}h ${info.play_time_m}m ${info.play_time_s}s`;
+    document.getElementById('gbaBadges').textContent      = `${info.badges} / 8`;
+
+    // Show viewer
+    document.getElementById('emptyState').style.display  = 'none';
+    document.getElementById('viewerTabs').style.display  = 'flex';
+    document.getElementById('viewerTitle').textContent   = `${info.game_name} — ${info.trainer_name}`;
+
+    // Populate box selector
+    const boxSelect = document.getElementById('boxSelect');
+    boxSelect.innerHTML = '';
+    (save.boxes || []).forEach((box, i) => {
+        const opt = document.createElement('option');
+        opt.value = i;
+        opt.textContent = `${box.name || 'Box ' + (i+1)} (${box.pokemon.length} Pokemon)`;
+        boxSelect.appendChild(opt);
+    });
+
+    showTab('party');
+}
+
+// ── Tab Switching ──────────────────────────────────────────────────────────────
+function showTab(tab) {
+    activeTab = tab;
+    document.getElementById('partyView').style.display = tab === 'party' ? 'block' : 'none';
+    document.getElementById('boxesView').style.display = tab === 'boxes' ? 'block' : 'none';
+    document.getElementById('tabParty').className  = tab === 'party'  ? 'btn btn-sm btn-primary me-1'   : 'btn btn-sm btn-secondary me-1';
+    document.getElementById('tabBoxes').className  = tab === 'boxes'  ? 'btn btn-sm btn-primary'        : 'btn btn-sm btn-secondary';
+
+    if (tab === 'party') renderParty();
+    if (tab === 'boxes') renderBox();
+}
+
+// ── Render Party ───────────────────────────────────────────────────────────────
+function renderParty() {
+    if (!currentSave) return;
+    const grid = document.getElementById('partyGrid');
+    const party = currentSave.party?.pokemon || [];
+
+    if (!party.length) {
+        grid.innerHTML = '<div class="col-12 text-center text-muted py-3">No Pokemon in party</div>';
+        return;
+    }
+
+    grid.innerHTML = party.map((p, i) => pokemonCard(p, i, 'party')).join('');
+}
+
+// ── Render Box ─────────────────────────────────────────────────────────────────
+function renderBox() {
+    if (!currentSave) return;
+    const boxIdx = parseInt(document.getElementById('boxSelect').value) || 0;
+    const box    = currentSave.boxes?.[boxIdx];
+    const grid   = document.getElementById('boxGrid');
+
+    if (!box || !box.pokemon.length) {
+        grid.innerHTML = '<div class="col-12 text-center text-muted py-3">Empty box</div>';
+        return;
+    }
+
+    grid.innerHTML = box.pokemon.map((p, i) => pokemonCard(p, i, `box_${boxIdx}`)).join('');
+}
+
+// ── Pokemon Card HTML ──────────────────────────────────────────────────────────
+function pokemonCard(p, idx, location) {
+    const shinyBadge = p.is_shiny
+        ? '<span class="badge ms-1" style="background:var(--gc-gold); color:#000; font-size:0.55rem;">✦ SHINY</span>'
+        : '';
+    const eggBadge = p.is_egg
+        ? '<span class="badge ms-1" style="background:var(--gc-surface-2); border:1px solid var(--gc-border); color:var(--gc-text-muted); font-size:0.55rem;">EGG</span>'
+        : '';
+    const genderIcon = p.gender === 'male' ? '♂' : p.gender === 'female' ? '♀' : '';
+
+    return `
+    <div class="col-md-4 col-sm-6">
+        <div class="card" style="cursor:pointer; border-radius:6px;"
+             onclick='showPokemonDetail(${JSON.stringify(p).replace(/"/g, """)}, "${location}_${idx}")'>
+            <div class="card-body p-2">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div style="font-family:'Orbitron',monospace; font-size:0.75rem; color:var(--gc-text-bright);">
+                            ${p.nickname || p.species_name}${shinyBadge}${eggBadge}
+                        </div>
+                        <small class="text-muted">${p.species_name} ${genderIcon} &bull; Lv.${p.level}</small>
+                    </div>
+                    <small class="text-muted">#${p.species_id}</small>
+                </div>
+                <div class="mt-1" style="font-size:0.72rem; color:var(--gc-text-muted);">
+                    ${p.nature} &bull; ${(p.move_names || []).slice(0,2).join(', ') || 'No moves'}
+                </div>
+                ${p.item_name && p.item_name !== 'None' ? `<div style="font-size:0.7rem; color:var(--gc-gold);">@ ${p.item_name}</div>` : ''}
+            </div>
+        </div>
+    </div>`;
+}
+
+// ── Pokemon Detail Modal ───────────────────────────────────────────────────────
+function showPokemonDetail(pokemon, location) {
+    currentPokemon = pokemon;
+    document.getElementById('pokemonModalTitle').textContent =
+        `${pokemon.nickname || pokemon.species_name} (${pokemon.species_name})`;
+
+    const shinySection = pokemon.is_shiny
+        ? '<div class="alert alert-warning mb-3"><i class="fas fa-star me-2"></i><strong>Shiny Pokemon!</strong></div>'
+        : '';
+
+    const ivRow = (label, val) =>
+        `<td style="font-size:0.8rem; padding:4px 8px;">${label}</td>
+         <td style="font-size:0.8rem; padding:4px 8px; color:var(--gc-cyan);">${val}</td>`;
+
+    const evRow = (label, val) =>
+        `<td style="font-size:0.8rem; padding:4px 8px;">${label}</td>
+         <td style="font-size:0.8rem; padding:4px 8px; color:var(--gc-gold);">${val}</td>`;
+
+    document.getElementById('pokemonModalBody').innerHTML = `
+        ${shinySection}
+        <div class="row g-3">
+            <div class="col-md-6">
+                <table class="table table-sm mb-0">
+                    <tr><td class="text-muted" style="font-size:0.8rem;">Species</td>
+                        <td style="font-size:0.8rem;">${pokemon.species_name} (#${pokemon.species_id})</td></tr>
+                    <tr><td class="text-muted" style="font-size:0.8rem;">Level</td>
+                        <td style="font-size:0.8rem;">${pokemon.level}</td></tr>
+                    <tr><td class="text-muted" style="font-size:0.8rem;">Nature</td>
+                        <td style="font-size:0.8rem;">${pokemon.nature}</td></tr>
+                    <tr><td class="text-muted" style="font-size:0.8rem;">Gender</td>
+                        <td style="font-size:0.8rem;">${pokemon.gender}</td></tr>
+                    <tr><td class="text-muted" style="font-size:0.8rem;">OT</td>
+                        <td style="font-size:0.8rem;">${pokemon.ot_name || '—'} (${pokemon.ot_id || '—'})</td></tr>
+                    <tr><td class="text-muted" style="font-size:0.8rem;">Met In</td>
+                        <td style="font-size:0.8rem;">${pokemon.met_game || '—'} Lv.${pokemon.met_level || '—'}</td></tr>
+                    <tr><td class="text-muted" style="font-size:0.8rem;">Friendship</td>
+                        <td style="font-size:0.8rem;">${pokemon.friendship || 0}</td></tr>
+                    <tr><td class="text-muted" style="font-size:0.8rem;">Item</td>
+                        <td style="font-size:0.8rem;">${pokemon.item_name || 'None'}</td></tr>
+                </table>
+            </div>
+            <div class="col-md-6">
+                <div style="font-family:'Orbitron',monospace; font-size:0.7rem; color:var(--gc-text-muted); margin-bottom:4px;">IVs</div>
+                <table class="table table-sm mb-2">
+                    <tr>${ivRow('HP', pokemon.hp_iv)}${ivRow('Atk', pokemon.atk_iv)}</tr>
+                    <tr>${ivRow('Def', pokemon.def_iv)}${ivRow('SpA', pokemon.spa_iv)}</tr>
+                    <tr>${ivRow('SpD', pokemon.spd_iv)}${ivRow('Spe', pokemon.spe_iv)}</tr>
+                </table>
+                <div style="font-family:'Orbitron',monospace; font-size:0.7rem; color:var(--gc-text-muted); margin-bottom:4px;">EVs</div>
+                <table class="table table-sm mb-0">
+                    <tr>${evRow('HP', pokemon.hp_ev)}${evRow('Atk', pokemon.atk_ev)}</tr>
+                    <tr>${evRow('Def', pokemon.def_ev)}${evRow('SpA', pokemon.spa_ev)}</tr>
+                    <tr>${evRow('SpD', pokemon.spd_ev)}${evRow('Spe', pokemon.spe_ev)}</tr>
+                </table>
+            </div>
+            <div class="col-12">
+                <div style="font-family:'Orbitron',monospace; font-size:0.7rem; color:var(--gc-text-muted); margin-bottom:6px;">MOVES</div>
+                <div class="d-flex flex-wrap gap-2">
+                    ${(pokemon.move_names || []).length
+                        ? pokemon.move_names.map(m => `<span class="badge" style="background:var(--gc-surface-2); border:1px solid var(--gc-border); color:var(--gc-text);">${m}</span>`).join('')
+                        : '<span class="text-muted" style="font-size:0.85rem;">No moves recorded</span>'}
+                </div>
+            </div>
+        </div>`;
+
+    new bootstrap.Modal(document.getElementById('pokemonModal')).show();
+}
+
+// ── Transfer to GCN ────────────────────────────────────────────────────────────
+async function transferToGCN() {
+    if (!currentPokemon || !currentSessionId) return;
+
+    try {
+        const resp = await fetch('/api/gba/transfer-to-gcn', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                session_id: currentSessionId,
+                pokemon: currentPokemon,
+            })
+        });
+        const data = await resp.json();
+        if (data.success) {
+            showAlert('success', `Transferred ${currentPokemon.species_name} to GCN!`);
+            addTransferLog(currentPokemon, 'GBA→GCN', data.result);
+            bootstrap.Modal.getInstance(document.getElementById('pokemonModal')).hide();
+        } else {
+            showAlert('danger', data.error || 'Transfer failed');
+        }
+    } catch(err) {
+        showAlert('danger', 'Network error: ' + err.message);
+    }
+}
+
+// ── Add to Team Builder ────────────────────────────────────────────────────────
+async function addToTeamBuilder() {
+    if (!currentPokemon) return;
+
+    try {
+        const resp = await fetch('/api/gba/convert-to-ptb', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({pokemon: currentPokemon})
+        });
+        const data = await resp.json();
+        if (data.success) {
+            showAlert('success', `${currentPokemon.species_name} added to Team Builder!`);
+            bootstrap.Modal.getInstance(document.getElementById('pokemonModal')).hide();
+        } else {
+            showAlert('danger', data.error || 'Conversion failed');
+        }
+    } catch(err) {
+        showAlert('danger', 'Network error: ' + err.message);
+    }
+}
+
+// ── Shadow Pokemon List ────────────────────────────────────────────────────────
+async function loadShadowList() {
+    const game = document.getElementById('shadowGameSelect').value;
+    try {
+        const resp = await fetch(`/api/gba/shadow-list?game=${game}`);
+        const data = await resp.json();
+        const list = document.getElementById('shadowList');
+        if (data.shadow_pokemon && data.shadow_pokemon.length) {
+            list.innerHTML = data.shadow_pokemon.map(p => `
+                <div class="d-flex justify-content-between align-items-center py-1 px-2"
+                     style="border-bottom:1px solid var(--gc-border); font-size:0.8rem;">
+                    <div>
+                        <span class="badge type-shadow me-2" style="font-size:0.6rem;">#${p.species_id}</span>
+                        <span style="color:var(--gc-text-bright);">${p.name}</span>
+                    </div>
+                    <small class="text-muted">${p.trainer}</small>
+                </div>`).join('');
+        } else {
+            list.innerHTML = '<div class="text-center text-muted py-3" style="font-size:0.82rem;">No data</div>';
+        }
+    } catch(err) {
+        console.error('Shadow list error:', err);
+    }
+}
+
+// ── Transfer Log ───────────────────────────────────────────────────────────────
+function addTransferLog(pokemon, direction, result) {
+    document.getElementById('transferLogCard').style.display = 'block';
+    const tbody = document.getElementById('transferLogBody');
+    const resultColor = result === 'success' ? 'var(--gc-success)' : 'var(--gc-danger)';
+    const row = document.createElement('tr');
+    row.innerHTML = `
+        <td style="font-size:0.8rem;">${pokemon.species_name} Lv.${pokemon.level}</td>
+        <td style="font-size:0.8rem;">${direction}</td>
+        <td style="font-size:0.8rem; color:${resultColor};">${result}</td>
+        <td style="font-size:0.8rem; color:var(--gc-text-muted);">${new Date().toLocaleTimeString()}</td>`;
+    tbody.prepend(row);
+}
+
+// ── Utilities ──────────────────────────────────────────────────────────────────
+function showAlert(type, message) {
+    const div = document.createElement('div');
+    div.className = `alert alert-${type} alert-dismissible fade show`;
+    div.innerHTML = `${message}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
+    document.querySelector('.container').prepend(div);
+    setTimeout(() => div.remove(), 5000);
+}
+
+// Load shadow list on page load
+document.addEventListener('DOMContentLoaded', loadShadowList);
+</script>
+{% endblock %}

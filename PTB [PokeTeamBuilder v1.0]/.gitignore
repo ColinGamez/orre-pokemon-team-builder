@@ -100,3 +100,35 @@ mobile/ios/Pods/
 
 # Sprite files (too large for git - user should download separately)
 ../Sprites/
+
+# PTB Memory Card files (user data)
+*.ptbmc
+memory_cards/
+.ptb/
+
+# GBA save files (user data — do not commit)
+*.sav
+*.SAV
+*.gci
+*.GCI
+
+# PTB user data directories
+saves/
+exports/
+uploads/
+
+# Production secrets
+.env.production
+.env.local
+
+# Gunicorn
+gunicorn.pid
+gunicorn.log
+
+# Coverage reports
+coverage.xml
+*.cover
+
+# Type checking
+.pyright/
+pyrightconfig.json

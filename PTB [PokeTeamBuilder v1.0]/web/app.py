@@ -1,30 +1,28 @@
 """
-Flask Web Application for Pokemon Team Builder.
-Provides web-based interface for team building and Pokemon management.
+PTB — Pokémon Team Builder v1.0
+Flask Web Application
 """
 
-
-# Ensure src directory is in Python path
 import sys
 import os
-project_root = os.path.dirname(os.path.abspath(__file__))
-src_path = os.path.join(project_root, 'src')
-if src_path not in sys.path:
-    sys.path.insert(0, src_path)
+import json
+import logging
+import secrets
+import functools
+from datetime import datetime, timedelta
+from typing import Dict, List, Optional, Any
+
+# ── Path Setup ────────────────────────────────────────────────────────────────
+# Add project root and src to Python path
+_web_dir     = os.path.dirname(os.path.abspath(__file__))
+_project_root = os.path.dirname(_web_dir)
+for _p in [_project_root, os.path.join(_project_root, 'src')]:
+    if _p not in sys.path:
+        sys.path.insert(0, _p)
 
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for, flash
 from flask_cors import CORS
 from flask_socketio import SocketIO, emit, join_room, leave_room
-import json
-import os
-import logging
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Any
-import secrets
-
-# Import core Pokemon Team Builder modules
-import sys
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 try:
     from core.pokemon import Pokemon
@@ -59,6 +57,27 @@ except ImportError:
         def create_battle(self, team1, team2):
             return {"id": "mock_battle"}
 
+# Import GBA Support
+try:
+    from src.features.gba_support import GBASaveParser, GBAToGCNTransfer, GBAGame
+    from src.trading.gba_trading import GBALinkCableTrading, GBALinkStatus
+    gba_parser = GBASaveParser()
+    gba_transfer = GBAToGCNTransfer()
+except ImportError as _e2:
+    gba_parser = None
+    gba_transfer = None
+    logging.getLogger(__name__).warning(f"GBA module not available: {_e2}")
+
+# Import Memory Card support
+try:
+    import sys as _sys
+    _sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+    from src.features.memory_card import MemoryCardManager, MemoryCard, MemoryCardGame, SlotStatus
+    memory_card_manager = MemoryCardManager()
+except ImportError as _e:
+    memory_card_manager = None
+    logging.getLogger(__name__).warning(f"Memory card module not available: {_e}")
+
 # Import multiplayer components
 from multiplayer_integration import WebMultiplayerIntegration
 
@@ -68,7 +87,7 @@ logger = logging.getLogger(__name__)
 
 # Initialize Flask app
 app = Flask(__name__)
-app.config['SECRET_KEY'] = secrets.token_urlsafe(32)
+app.config['SECRET_KEY'] = os.environ.get('PTB_SECRET_KEY', secrets.token_urlsafe(32))
 app.config['SESSION_PERMANENT'] = False
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=24)
 
@@ -127,13 +146,13 @@ def get_current_user():
 
 def require_login(f):
     """Decorator to require user login."""
+    @functools.wraps(f)
     def decorated_function(*args, **kwargs):
         if 'user_id' not in session:
             if request.is_json:
                 return jsonify({'error': 'Authentication required'}), 401
             return redirect(url_for('login'))
         return f(*args, **kwargs)
-    decorated_function.__name__ = f.__name__
     return decorated_function
 
 # Routes
@@ -142,7 +161,11 @@ def require_login(f):
 def index():
     """Main page."""
     user = get_current_user()
-    return render_template('index.html', user=user)
+    try:
+        active_tournaments = tournament_manager.get_active_tournaments()
+    except Exception:
+        active_tournaments = []
+    return render_template('index.html', user=user, users_db=users_db, teams_db=teams_db, battles_db=battles_db, active_tournaments=active_tournaments)
 
 # Multiplayer routes are now handled by multiplayer_integration
 
@@ -247,6 +270,175 @@ def leaderboard():
     # Sort users by rating
     top_users = sorted(users_db.values(), key=lambda u: u.rating, reverse=True)[:50]
     return render_template('leaderboard.html', users=top_users)
+
+# GBA Link Cable Routes
+
+@app.route("/gba")
+def gba_support():
+    """GBA link cable support page."""
+    return render_template("gba_support.html")
+
+@app.route("/api/gba/import-save", methods=["POST"])
+def api_gba_import_save():
+    """Import a GBA .sav file."""
+    if not gba_parser:
+        return jsonify({"success": False, "error": "GBA module unavailable"}), 503
+    if "sav_file" not in request.files:
+        return jsonify({"success": False, "error": "No file provided"}), 400
+    f = request.files["sav_file"]
+    import tempfile, os
+    with tempfile.NamedTemporaryFile(suffix=".sav", delete=False) as tmp:
+        f.save(tmp.name)
+        tmp_path = tmp.name
+    try:
+        save = gba_parser.parse_save_file(tmp_path)
+        if save is None:
+            return jsonify({"success": False, "error": "Failed to parse GBA save file"}), 400
+        import uuid as _uuid
+        session_id = str(_uuid.uuid4())
+        return jsonify({"success": True, "save": save.to_dict(), "session_id": session_id})
+    finally:
+        os.unlink(tmp_path)
+
+@app.route("/api/gba/transfer-to-gcn", methods=["POST"])
+def api_gba_transfer_to_gcn():
+    """Transfer a Pokemon from GBA to GCN."""
+    if not gba_transfer:
+        return jsonify({"success": False, "error": "GBA module unavailable"}), 503
+    data = request.get_json() or {}
+    pokemon = data.get("pokemon", {})
+    session_id = data.get("session_id", "")
+    compat, reason = gba_transfer._checker.check_gba_to_gcn(
+        species_id=pokemon.get("species_id", 0),
+        is_shadow=False,
+        is_egg=pokemon.get("is_egg", False),
+        level=pokemon.get("level", 1),
+        total_evs=sum([pokemon.get(k, 0) for k in ["hp_ev","atk_ev","def_ev","spe_ev","spa_ev","spd_ev"]]),
+    )
+    return jsonify({"success": compat, "result": "success" if compat else "failed", "error": None if compat else reason})
+
+@app.route("/api/gba/convert-to-ptb", methods=["POST"])
+def api_gba_convert_to_ptb():
+    """Convert a PK3 Pokemon to PTB team builder format."""
+    if not gba_transfer:
+        return jsonify({"success": False, "error": "GBA module unavailable"}), 503
+    data = request.get_json() or {}
+    pokemon_data = data.get("pokemon", {})
+    try:
+        from src.features.gba_support import PK3Pokemon
+        pk3 = PK3Pokemon.from_dict(pokemon_data)
+        ptb_data = gba_transfer.convert_pk3_to_ptb_dict(pk3)
+        return jsonify({"success": True, "ptb_pokemon": ptb_data})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 400
+
+@app.route("/api/gba/shadow-list")
+def api_gba_shadow_list():
+    """Get Shadow Pokemon list for Colosseum or XD."""
+    if not gba_transfer:
+        return jsonify({"shadow_pokemon": []})
+    game = request.args.get("game", "colosseum")
+    if game == "xd_gale":
+        shadow_list = gba_transfer.get_xd_shadow_list()
+    else:
+        shadow_list = gba_transfer.get_colosseum_shadow_list()
+    return jsonify({"shadow_pokemon": shadow_list})
+
+@app.route("/api/gba/version-exclusives")
+def api_gba_version_exclusives():
+    """Get version-exclusive Pokemon for a GBA game."""
+    if not gba_transfer:
+        return jsonify({"exclusives": []})
+    game_str = request.args.get("game", "ruby")
+    try:
+        game = GBAGame(game_str)
+        info = gba_transfer.get_version_exclusives_info(game)
+        return jsonify(info)
+    except ValueError:
+        return jsonify({"error": f"Unknown game: {game_str}"}), 400
+
+# Memory Card Routes
+
+@app.route("/memory-card")
+def memory_card():
+    """Memory Card manager page."""
+    saved_cards = memory_card_manager.list_saved_cards() if memory_card_manager else []
+    return render_template("memory_card.html", saved_cards=saved_cards)
+
+@app.route("/api/memory-card/import-gci", methods=["POST"])
+def api_mc_import_gci():
+    """Import a .gci file."""
+    if not memory_card_manager:
+        return jsonify({"success": False, "error": "Memory card module unavailable"}), 503
+    if "gci_file" not in request.files:
+        return jsonify({"success": False, "error": "No file provided"}), 400
+    f = request.files["gci_file"]
+    import tempfile, os
+    with tempfile.NamedTemporaryFile(suffix=".gci", delete=False) as tmp:
+        f.save(tmp.name)
+        tmp_path = tmp.name
+    try:
+        card = memory_card_manager.load_gci(tmp_path)
+        if card is None:
+            return jsonify({"success": False, "error": "Failed to parse GCI file"}), 400
+        return jsonify({"success": True, "card": card.to_dict()})
+    finally:
+        os.unlink(tmp_path)
+
+@app.route("/api/memory-card/create", methods=["POST"])
+def api_mc_create():
+    """Create a new virtual Memory Card."""
+    if not memory_card_manager:
+        return jsonify({"success": False, "error": "Memory card module unavailable"}), 503
+    data = request.get_json() or {}
+    label = data.get("label", "Memory Card A")[:32]
+    size_mb = int(data.get("size_mb", 59))
+    card = memory_card_manager.create_new_card(label=label, size_mb=size_mb)
+    saved_path = memory_card_manager.save_ptbmc(card)
+    return jsonify({"success": True, "card": card.to_dict(), "file_path": saved_path})
+
+@app.route("/api/memory-card/load", methods=["POST"])
+def api_mc_load():
+    """Load a .ptbmc file."""
+    if not memory_card_manager:
+        return jsonify({"success": False, "error": "Memory card module unavailable"}), 503
+    data = request.get_json() or {}
+    file_path = data.get("file_path", "")
+    card = memory_card_manager.load_ptbmc(file_path)
+    if card is None:
+        return jsonify({"success": False, "error": "Failed to load card"}), 400
+    return jsonify({"success": True, "card": card.to_dict()})
+
+@app.route("/api/memory-card/save", methods=["POST"])
+def api_mc_save():
+    """Save a MemoryCard to .ptbmc."""
+    if not memory_card_manager:
+        return jsonify({"success": False, "error": "Memory card module unavailable"}), 503
+    data = request.get_json() or {}
+    try:
+        from src.features.memory_card import MemoryCard as MC
+        card = MC.from_dict(data.get("card", {}))
+        saved_path = memory_card_manager.save_ptbmc(card)
+        return jsonify({"success": True, "file_path": saved_path})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 400
+
+@app.route("/api/memory-card/delete", methods=["POST"])
+def api_mc_delete():
+    """Delete a .ptbmc file."""
+    if not memory_card_manager:
+        return jsonify({"success": False, "error": "Memory card module unavailable"}), 503
+    data = request.get_json() or {}
+    file_path = data.get("file_path", "")
+    ok = memory_card_manager.delete_card(file_path)
+    return jsonify({"success": ok, "error": None if ok else "File not found or not a .ptbmc"})
+
+@app.route("/api/memory-card/list")
+def api_mc_list():
+    """List all saved .ptbmc files."""
+    if not memory_card_manager:
+        return jsonify({"cards": []})
+    return jsonify({"cards": memory_card_manager.list_saved_cards()})
 
 # API Routes
 
@@ -583,6 +775,29 @@ def inject_datetime():
     return {'datetime': datetime}
 
 # Development configuration
+# ── Health Check & Utility Routes ────────────────────────────────────────────
+
+@app.route("/health")
+def health_check():
+    """Health check endpoint for load balancers and monitoring."""
+    return jsonify({
+        "status": "ok",
+        "version": "1.0.0",
+        "timestamp": datetime.utcnow().isoformat() + "Z",
+        "services": {
+            "memory_card": memory_card_manager is not None,
+            "gba_support":  gba_parser is not None,
+            "tournaments":  True,
+        }
+    })
+
+@app.route("/robots.txt")
+def robots_txt():
+    """Robots.txt for search engine crawlers."""
+    from flask import Response
+    return Response("User-agent: *\nDisallow: /api/\nDisallow: /admin/\n",
+                    mimetype="text/plain")
+
 if __name__ == '__main__':
     # Create templates and static directories if they don't exist
     os.makedirs('templates', exist_ok=True)
@@ -592,4 +807,8 @@ if __name__ == '__main__':
     
     # Run the application
     logger.info("Starting Pokemon Team Builder Web Application")
-    socketio.run(app, debug=True, host='0.0.0.0', port=5000)
+    host = os.environ.get("HOST", "0.0.0.0")
+    port = int(os.environ.get("PORT", 5000))
+    debug = os.environ.get("DEBUG", "False").lower() == "true"
+    logger.info(f"Starting PTB on {host}:{port} (debug={debug})")
+    socketio.run(app, debug=debug, host=host, port=port)
